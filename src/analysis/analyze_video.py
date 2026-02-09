@@ -1,11 +1,14 @@
 import pandas as pd
 import numpy as np
+from src.data.schema import get_tracking_dataframe
 
-CSV_PATH = "/Users/cadetanaka/Desktop/Other projects/NBA_game_analyzer/src/tracking/tracking_data.csv"
 FPS = 30
 SECONDS_PER_FRAME = 1 / FPS
+GAME_ID = 4
 
-df = pd.read_csv(CSV_PATH)
+df = get_tracking_dataframe(GAME_ID)
+
+print(df.head(), len(df))
 
 df = df.sort_values(["track_id", "frame"]).reset_index(drop=True)
 
@@ -62,7 +65,7 @@ zone_time_pivot = zone_time.pivot(
 speed_stats = (
     df.groupby("track_id")["speed_pixels_per_sec"]
     .mean()
-    .reset_index(name={"avg_speed_pixels_per_sec"})
+    .reset_index(name="avg_speed_pixels_per_sec")
 )
 
 # =========================
@@ -83,10 +86,10 @@ team_speed = (
 # =========================
 # SAVE OUTPUTS
 # =========================
-distance_stats.to_csv("player_distance.csv", index=False)
-speed_stats.to_csv("player_speed.csv", index=False)
-zone_time_pivot.to_csv("player_zone_time.csv")
-team_zone_time.to_csv("team_zone_time.csv", index=False)
-team_speed.to_csv("team_speed.csv", index=False)
+distance_stats.to_csv(f"player_distance_game_{GAME_ID}.csv", index=False)
+speed_stats.to_csv(f"player_speed_game_{GAME_ID}.csv", index=False)
+zone_time_pivot.to_csv(f"player_zone_time_game_{GAME_ID}.csv")
+team_zone_time.to_csv(f"team_zone_time_game_{GAME_ID}.csv", index=False)
+team_speed.to_csv(f"team_speed_game_{GAME_ID}.csv", index=False)
 
 print("Analysis complete!")

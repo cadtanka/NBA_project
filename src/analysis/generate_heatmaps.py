@@ -2,24 +2,29 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+from src.data.schema import get_tracking_dataframe
+from scipy.ndimage import gaussian_filter
 
-CSV_PATH = "/Users/cadetanaka/Desktop/Other projects/NBA_game_analyzer/src/tracking/tracking_data.csv"
+VIDEO_WIDTH = 1920
+VIDEO_HEIGHT = 1080
 COURT_IMAGE_PATH = "/Users/cadetanaka/Desktop/Other projects/NBA_game_analyzer/src/analysis/images/court_image.png"
-df = pd.read_csv(CSV_PATH)
+GAME_ID = 4
+df = get_tracking_dataframe(GAME_ID)
 
 court_img = cv2.imread(COURT_IMAGE_PATH)
 court_img = cv2.cvtColor(court_img, cv2.COLOR_BGR2RGB)
 
 court_h, court_w, _ = court_img.shape
 
-video_w = df["cx"].max()
-video_h = df["cy"].max()
+video_w = VIDEO_WIDTH
+video_h = VIDEO_HEIGHT
 
 df["court_x"] = df["cx"] / video_w * court_w
-df["court_y"] = df["cy"] / video_h * court_h
+df["court_y"] = court_h - (df["cy"] / video_h * court_h)
 
 def create_court_heatmap(x, y, title, output_file, bins=80):
     heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
+    heatmap = gaussian_filter(heatmap, sigma=2)
 
     plt.figure(figsize=(12, 7))
 
@@ -52,10 +57,10 @@ for team in teams:
     team_df = df[df["team"] == team]
 
     create_court_heatmap(
-        team_df["cx"],
-        team_df["cy"],
+        team_df["court_x"],
+        team_df["court_y"],
         f"{team} Player Position Heatmap",
-        f"{team}_heatmap.png"
+        f"{team}_game_{GAME_ID}_heatmap.png"
     )
 
 print("Team heatmaps saved.")
@@ -73,10 +78,10 @@ for player in players:
         continue
 
     create_court_heatmap(
-        player_df["cx"],
-        player_df["cy"],
+        player_df["court_x"],
+        player_df["court_y"],
         f"Player {player} Heatmap",
-        f"player_{player}_heatmap.png"
+        f"player_{player}_game_{GAME_ID}_heatmap.png"
     )
 
 print("Player heatmaps saved.")
