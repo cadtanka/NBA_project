@@ -112,6 +112,15 @@ def create_tables():
             );
         """))
 
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS ingestion_log (
+                game_id TEXT PRIMARY KEY,
+                boxscore_done BOOLEAN DEFAULT FALSE<
+                advanced_done BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """))
+
         conn.commit()
 
 def insert_game(game_date, home_team, away_team, video_path):
