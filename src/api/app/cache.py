@@ -10,3 +10,11 @@ def cache_get(key):
 def cache_set(key, value, expire=3600):
     r.set(key, json.dumps(value), ex=expire)
 
+def cache_delete_platform(pattern: str):
+    """
+    Deletes all keys matching a pattern
+    Used for cache invalidation
+    """
+
+    for key in r.scan_iter(pattern):
+        r.delete(key)

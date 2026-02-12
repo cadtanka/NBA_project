@@ -43,3 +43,12 @@ CREATE TABLE player_positions(
 
     confidence FLOAT
 );
+
+CREATE INDEX idx_frames_game_clock
+ON frames(game_id, game_clock)
+
+CREATE INDEX idx_player_positions_frame
+ON player_positions(frame_id)
+
+CREATE INDEX idx_player_positions_player
+ON player_positions(player_id)

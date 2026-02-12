@@ -11,6 +11,58 @@ DROP TABLE IF EXISTS games;
 from sqlalchemy import text
 from src.data.db_entrypoint import engine
 import pandas as pd
+from datetime import date
+
+def get_games(game_id: int):
+    query = text("""
+        SELECT id, game_date, home_team, away_team, video_path
+        FROM games
+        WHERE id = :game_id
+    """)
+
+    with engine.begin() as conn:
+        result = conn.execute(query, {"game_id": game_id}).mappings().first()
+
+    if not result:
+        return None
+    
+    result = dict(result)
+
+    if isinstance(result["game_date"], date):
+        result["game_date"] = result["game_date"].isoformat()
+
+    # Transform DB row into API response shape
+    return { 
+            "game_id": result["id"], 
+            "status": "completed", # or fetch from DB if you add this column later 
+            "teams": [result["home_team"], result["away_team"]], 
+            "date": result["game_date"], 
+            }
+
+def get_positions_in_timerange(game_id: int, start_time: float, end_time: float):
+    query = text("""
+        SELECT
+            p.id as player_id,
+            f.game_clock,
+            pp.cx,
+            pp.cy,
+            pp.zone
+        FROM player_posititions pp
+        JOIN frame f ON pp.frame_id = f.id
+        JOIN players p ON pp.player_id = p.id
+        WHERE f.game_id = :game_id
+        AND f.game_clock BETWEEN :start_time AND :end_time
+        ORDER BY f.game_clock
+    """)
+
+    with engine.begin() as conn:
+        rows = conn.execute(query, {
+            "game_id": game_id,
+            "start_time": start_time,
+            "end_time": end_time
+        }).mappings().all()
+
+    return [dict(r) for r in rows]
 
 def create_tables():
     with engine.begin() as conn:
@@ -162,3 +214,23 @@ def get_tracking_dataframe(game_id: int):
         df = pd.read_sql(query, conn, params={"game_id": game_id})
 
     return df
+
+def get_full_tracking(game_id: int):
+    query = text("""
+        SELECT
+            f.game_clock,
+            p.id AS player_id,
+            p.team,
+            pp.cx,
+            pp.cy
+        FROM frames f
+        JOIN player_positions pp ON pp.frame_id = f.id
+        JOIN players p ON pp.player_id = p.id
+        WHERE f.game_id = :game_id
+        ORDER BY f.game_clock;
+    """)
+
+    with engine.begin() as conn:
+        rows = conn.execute(query, {"game_id": game_id}).mappings().all()
+
+    return [dict(r) for r in rows]
