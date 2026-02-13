@@ -7,6 +7,7 @@ from src.api.app.cache import cache_get, cache_set
 from src.api.app.services.heatmap_service import get_player_heatmap, get_team_heatmap
 from src.api.app.services import video_config
 from src.api.app.services.video_config import create_default_config
+from src.data.analytics_queries import get_movement_vs_performance
 
 router = APIRouter()
 
@@ -94,3 +95,11 @@ def heatmap_endpoint(
             raise HTTPException(status_code=400, detail=result["error"])
         cache_set(cache_key, result, expire=3600)
         return result
+    
+@router.get("players/{player_id}/movement-vs-performance")
+def movement_vs_performance(player_id: int):
+    data = get_movement_vs_performance(player_id)
+    return {
+        "player_id": player_id,
+        "games": data
+    }

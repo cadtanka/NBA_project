@@ -115,9 +115,33 @@ def create_tables():
         conn.execute(text("""
             CREATE TABLE IF NOT EXISTS ingestion_log (
                 game_id TEXT PRIMARY KEY,
-                boxscore_done BOOLEAN DEFAULT FALSE<
+                boxscore_done BOOLEAN DEFAULT FALSE,
                 advanced_done BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """))
+
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS player_game_advanced (
+                game_id TEXT,
+                player_id INT,
+                offensive_rating FLOAT,
+                defensive_rating FLOAT,
+                usage_pct FLOAT,
+                true_shooting_pct FLOAT,
+                pace FLOAT,
+                pie FLOAT,          
+                PRIMARY KEY (game_id, player_id)
+            )
+        """
+        ))
+
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS player_id_map (
+                tracking_player_id INT PRIMARY KEY REFERENCES players(id),
+                nba_player_id INT,
+                player_name TEXT,
+                team TEXT
             );
         """))
 

@@ -30,7 +30,6 @@ def store_games(df):
         "games", engine, if_exists="append", index=False
     )
 
-
 def populate_ingestion_log(df):
     ids = pd.DataFrame({"game_id": df["GAME_ID"].unique()})
     ids.to_sql("ingestion_log", engine, if_exists="append", index=False)
