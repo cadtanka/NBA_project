@@ -1,4 +1,4 @@
-# TO RUN: python ingest_boxscores.py
+# TO RUN: python3 ingest_boxscores.py
 
 from sqlalchemy import create_engine, text
 from nba_api.stats.endpoints import boxscoretraditionalv2, boxscoreadvancedv2

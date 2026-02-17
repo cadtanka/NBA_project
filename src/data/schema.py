@@ -145,6 +145,25 @@ def create_tables():
             );
         """))
 
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS team_game_advanced (
+                game_id TEXT,
+                team_id INT,
+                team_name TEXT,
+
+                offensive_rating FLOAT,
+                defensive_rating FLOAT,
+                pace FLOAT,
+                true_shooting_pct FLOAT,
+                effective_fg_pct FLOAT,
+                assist_pct FLOAT,
+                turnover_pct FLOAT,
+                rebound_pct FLOAT,
+
+                PRIMARY KEY (game_id, team_id)
+            );
+        """))
+
         conn.commit()
 
 def insert_game(game_date, home_team, away_team, video_path):
